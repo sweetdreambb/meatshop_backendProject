@@ -1,4 +1,4 @@
-package com.fsse2506.project.data.domainObject.response;
+package com.fsse2506.project.data.cartItem.domainObject.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
