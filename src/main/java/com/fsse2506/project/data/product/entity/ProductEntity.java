@@ -1,25 +1,29 @@
-package com.fsse2506.project.data.entity;
+package com.fsse2506.project.data.product.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Min;
+import lombok.*;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name="product")
-@Getter @Setter @NoArgsConstructor
+@Data
+@NoArgsConstructor @AllArgsConstructor
 public class ProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer pid;
     @Column(nullable = false)
     private String name;
-    @Column
+
     private String description;
-    @Column
+
     private String imageUrl;
     @Column(nullable = false)
-    private Double price;
+    @Min(0)
+    private BigDecimal price;
     @Column(nullable = false)
+    @Min(0)
     private Integer stock;
 }

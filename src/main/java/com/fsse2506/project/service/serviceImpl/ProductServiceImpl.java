@@ -1,9 +1,10 @@
 package com.fsse2506.project.service.serviceImpl;
 
-import com.fsse2506.project.data.domainObject.response.ProductResponseData;
-import com.fsse2506.project.data.entity.ProductEntity;
+import com.fsse2506.project.data.product.domainObject.response.GetAllProductResponseData;
+import com.fsse2506.project.data.product.domainObject.response.ProductResponseData;
+import com.fsse2506.project.data.product.entity.ProductEntity;
 import com.fsse2506.project.exception.ProductNotFoundException;
-import com.fsse2506.project.mapper.ProductDataMapper;
+import com.fsse2506.project.mapper.product.ProductDataMapper;
 import com.fsse2506.project.repository.ProductRepository;
 import com.fsse2506.project.service.ProductService;
 import org.slf4j.Logger;
@@ -23,22 +24,26 @@ public class ProductServiceImpl implements ProductService {
         this.productRepository = productRepository;
     }
     @Override
-    public List<ProductResponseData> getAllProducts(){
-        return productDataMapper.toProductResponseDataList(
+    public List<GetAllProductResponseData> getAllProducts(){
+        return productDataMapper.toGetAllProductResponseDataList(
                 (List<ProductEntity>) productRepository.findAll()
         );
     }
     @Override
     public ProductResponseData getProductByPid(Integer pid) {
         try {
-            return productDataMapper.toProductReponseData(
-                    productRepository.findById(pid).orElseThrow(
-                            () -> new ProductNotFoundException(pid)
-                    )
+            return productDataMapper.toProductResponseData(
+                    getProductEntityByPid(pid)
             );
         } catch (Exception ex) {
-            logger.warn("Get Product fail: {}",ex.getMessage());
+            logger.warn("Get product by pid failed: {}",ex.getMessage());
             throw ex;
         }
+    }
+    @Override
+    public ProductEntity getProductEntityByPid(Integer pid){
+        return productRepository.findById(pid).orElseThrow(
+                () -> new ProductNotFoundException(pid)
+        );
     }
 }
