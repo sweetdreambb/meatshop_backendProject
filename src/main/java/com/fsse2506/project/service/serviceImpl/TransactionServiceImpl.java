@@ -1,56 +1,66 @@
 package com.fsse2506.project.service.serviceImpl;
 
-import com.fsse2506.project.data.transaction.domainObject.request.CreateTransactionRequestData;
+import com.fsse2506.project.data.cartItem.domainObject.response.CartItemResponseData;
+
 import com.fsse2506.project.data.transaction.domainObject.response.TransactionResponseData;
 import com.fsse2506.project.data.transaction.entity.TransactionEntity;
-import com.fsse2506.project.data.transactionProduct.domainObject.request.CreateTransactionProductRequestData;
-import com.fsse2506.project.data.transactionProduct.entity.TransactionProductEntity;
+
 import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
-import com.fsse2506.project.mapper.transaction.TransactionEntityMapper;
-import com.fsse2506.project.mapper.transactionProduct.TransactionProductDataMapper;
-import com.fsse2506.project.mapper.transactionProduct.TransactionProductEntityMapper;
-import com.fsse2506.project.repository.TransactionProductRepository;
+import com.fsse2506.project.mapper.transaction.TransactionDataMapper;
 import com.fsse2506.project.repository.TransactionRepository;
-import com.fsse2506.project.service.TransactionService;
-import com.fsse2506.project.service.UserService;
+import com.fsse2506.project.service.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
     private final UserService userService;
-    private final TransactionEntityMapper transactionEntityMapper;
-    private final TransactionProductEntityMapper transactionProductEntityMapper;
-    private final TransactionProductRepository transactionProductRepository;
     private final TransactionRepository transactionRepository;
-    private final TransactionProductDataMapper transactionProductDataMapper;
+    private final TransactionProductService transactionProductService;
+    private final TransactionDataMapper transactionDataMapper;
+    private final CartItemService cartItemService;
 
-    public TransactionServiceImpl(UserService userService, TransactionEntityMapper transactionEntityMapper, TransactionProductEntityMapper transactionProductEntityMapper, TransactionProductRepository transactionProductRepository, TransactionRepository transactionRepository, TransactionProductDataMapper transactionProductDataMapper) {
+    public TransactionServiceImpl(UserService userService, TransactionRepository transactionRepository, TransactionProductService transactionProductService, TransactionDataMapper transactionDataMapper, CartItemService cartItemService) {
         this.userService = userService;
-        this.transactionEntityMapper = transactionEntityMapper;
-        this.transactionProductEntityMapper = transactionProductEntityMapper;
-        this.transactionProductRepository = transactionProductRepository;
         this.transactionRepository = transactionRepository;
-        this.transactionProductDataMapper = transactionProductDataMapper;
+        this.transactionProductService = transactionProductService;
+        this.transactionDataMapper = transactionDataMapper;
+        this.cartItemService = cartItemService;
     }
 
-    public TransactionResponseData createTransaction(FirebaseUserData firebaseUserData, CreateTransactionRequestData createTransactionRequestData){
+    @Override
+    public TransactionResponseData createTransaction(
+            FirebaseUserData firebaseUserData){
 
-        UserEntity userEntity=userService.getUserEntityByEmail(firebaseUserData);
-        TransactionEntity transactionEntity=transactionEntityMapper.toTransactionEntity(createTransactionRequestData,userEntity);
+        UserEntity userEntity=
+                userService.getUserEntityByEmail(firebaseUserData);
 
-        transactionProductRepository.saveAll(
-                transactionProductEntityMapper.toTransactionProductEntityList(
-                        createTransactionProductRequestDataList,transactionEntity
+        List<CartItemResponseData> cartItemResponseDataList=
+                cartItemService.getAllCartItem(firebaseUserData);
+
+        BigDecimal total=BigDecimal.ZERO;
+        for (CartItemResponseData cartItemResponseData: cartItemResponseDataList){
+            BigDecimal quantity=BigDecimal.valueOf(cartItemResponseData.getCartQuantity());
+            BigDecimal price=cartItemResponseData.getPrice();
+            total=total.add(quantity.multiply(price));
+        }
+
+        TransactionEntity transactionEntity=new TransactionEntity();
+        transactionEntity.setUserEntity(userEntity);
+        transactionEntity.setDatetime(LocalDateTime.now());
+        transactionEntity.setStatus("PREPARE");
+        transactionEntity.setTotal(total);
+        transactionRepository.save(transactionEntity);
+        return transactionDataMapper.toTransactionResponseData(
+                transactionEntity,transactionProductService.createTransactionProductResponseDataList(
+                        transactionEntity,
+                        cartItemResponseDataList
                 )
         );
-
-        transactionRepository.save(transactionEntity);
-
-
     }
 
 }

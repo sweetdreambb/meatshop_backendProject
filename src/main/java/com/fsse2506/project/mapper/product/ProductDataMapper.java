@@ -36,6 +36,12 @@ public class ProductDataMapper {
         productResponseData.setPrice(productEntity.getPrice());
         return productResponseData;
     }
-
+    public List<ProductResponseData> toProductResponseDataList(List<ProductEntity> productEntityList){
+        List<ProductResponseData> productResponseDataList=new ArrayList<>();
+        for (ProductEntity productEntity: productEntityList){
+            productResponseDataList.add(toProductResponseData(productEntity));
+        }
+        return productResponseDataList;
+    }
 
 }

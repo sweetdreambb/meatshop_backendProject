@@ -5,6 +5,7 @@ import com.fsse2506.project.data.cartItem.entity.CartItemEntity;
 import com.fsse2506.project.data.product.entity.ProductEntity;
 import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
+import com.fsse2506.project.exception.ProductExceedStockException;
 import com.fsse2506.project.exception.ProductNotFoundException;
 import com.fsse2506.project.exception.UpdateProductQuantityNegativeException;
 import com.fsse2506.project.mapper.cartItem.CartItemDataMapper;
@@ -38,13 +39,22 @@ public class CartItemServiceImpl implements CartItemService {
     }
     @Override
     public void putCartItem(Integer pid, Integer quantity, FirebaseUserData firebaseUserData){
-        cartItemRepository.save(
-                cartItemEntityMapper.toCartItemEntity(
-                        quantity
-                        ,userService.getUserEntityByEmail(firebaseUserData)
-                        ,productService.getProductEntityByPid(pid)
-                )
-        );
+        try {
+            Integer stock = productService.getProductByPid(pid).getStock();
+            if (quantity > stock) {
+                throw new ProductExceedStockException(stock);
+            }
+            cartItemRepository.save(
+                    cartItemEntityMapper.toCartItemEntity(
+                            quantity
+                            , userService.getUserEntityByEmail(firebaseUserData)
+                            , productService.getProductEntityByPid(pid)
+                    )
+            );
+        } catch (Exception ex){
+            logger.warn("Add item to cart failed: {}", ex.getMessage());
+            throw ex;
+        }
     }
     @Override
     public List<CartItemResponseData> getAllCartItem(FirebaseUserData firebaseUserData){
@@ -93,5 +103,4 @@ public class CartItemServiceImpl implements CartItemService {
                 )
         );
     }
-
 }

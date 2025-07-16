@@ -1,5 +1,6 @@
 package com.fsse2506.project.data.transaction.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fsse2506.project.data.transactionProduct.dto.response.TransactionProductResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,5 +18,6 @@ public class TransactionResponseDto {
     private LocalDateTime datetime;
     private String status;
     private BigDecimal total;
+    @JsonProperty("items")
     private List<TransactionProductResponseDto> transactionProductResponseDtoList;
 }

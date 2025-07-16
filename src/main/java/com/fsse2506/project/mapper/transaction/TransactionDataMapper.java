@@ -1,30 +1,23 @@
 package com.fsse2506.project.mapper.transaction;
 
-import com.fsse2506.project.data.transaction.domainObject.request.CreateTransactionRequestData;
-import com.fsse2506.project.data.transaction.dto.request.CreateTransactionRequestDto;
-import com.fsse2506.project.mapper.transactionProduct.TransactionProductDataMapper;
+import com.fsse2506.project.data.transaction.domainObject.response.TransactionResponseData;
+import com.fsse2506.project.data.transaction.entity.TransactionEntity;
+import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class TransactionDataMapper {
-    private final TransactionProductDataMapper transactionProductDataMapper;
 
-    public TransactionDataMapper(TransactionProductDataMapper transactionProductDataMapper) {
-        this.transactionProductDataMapper = transactionProductDataMapper;
-    }
-
-    public CreateTransactionRequestData toCreateTransactionRequestData(CreateTransactionRequestDto createTransactionRequestDto){
-        CreateTransactionRequestData createTransactionRequestData=new CreateTransactionRequestData();
-        createTransactionRequestData.setCreateTransactionProductRequestDataList(
-                transactionProductDataMapper.toCreateTransactionProductRequestDataList(
-                        createTransactionRequestDto.getCreateTransactionProductRequestDtoList()
-                )
-        );
-        createTransactionRequestData.setTid(createTransactionRequestDto.getTid());
-        createTransactionRequestData.setTotal(createTransactionRequestDto.getTotal());
-        createTransactionRequestData.setStatus(createTransactionRequestDto.getStatus());
-        createTransactionRequestData.setDatetime(createTransactionRequestDto.getDatetime());
-        createTransactionRequestData.setBuyerUid(createTransactionRequestDto.getBuyerUid());
-        return createTransactionRequestData;
+    public TransactionResponseData toTransactionResponseData(TransactionEntity transactionEntity, List<TransactionProductResponseData> transactionProductResponseDataList){
+        TransactionResponseData transactionResponseData=new TransactionResponseData();
+        transactionResponseData.setTid(transactionEntity.getTid());
+        transactionResponseData.setBuyerUid(transactionEntity.getUserEntity().getUid());
+        transactionResponseData.setDatetime(transactionEntity.getDatetime());
+        transactionResponseData.setStatus(transactionEntity.getStatus());
+        transactionResponseData.setTotal(transactionEntity.getTotal());
+        transactionResponseData.setTransactionProductResponseDataList(transactionProductResponseDataList);
+        return transactionResponseData;
     }
 }

@@ -1,5 +1,6 @@
 package com.fsse2506.project.data.transaction.domainObject.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
