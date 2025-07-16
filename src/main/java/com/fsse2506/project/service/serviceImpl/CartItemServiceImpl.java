@@ -72,6 +72,17 @@ public class CartItemServiceImpl implements CartItemService {
             throw ex;
         }
     }
+    @Override
+    public void removeCartItem(FirebaseUserData firebaseUserData, Integer pid){
+        try{
+            cartItemRepository.delete(getCartItemEntity(
+                    userService.getUserEntityByEmail(firebaseUserData)
+                    , productService.getProductEntityByPid(pid)));
+        }catch (Exception ex){
+            logger.warn("Remove Cart Item failed: {}",ex.getMessage());
+            throw ex;
+        }
+    }
     public CartItemEntity getCartItemEntity(UserEntity userEntity, ProductEntity productEntity){
         return cartItemRepository.findByUserEntityAndProductEntity(
                 userEntity

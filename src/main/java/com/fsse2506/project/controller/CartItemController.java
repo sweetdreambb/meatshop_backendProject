@@ -47,4 +47,9 @@ public class CartItemController {
     public void updateCartQuantity(@AuthenticationPrincipal Jwt jwt,@PathVariable Integer pid, @PathVariable Integer quantity){
         cartItemService.updateCartQuantity(userDataMapper.toFirebaseUserData(jwt),pid,quantity);
     }
+    @DeleteMapping("/{pid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeCartItem(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer pid){
+        cartItemService.removeCartItem(userDataMapper.toFirebaseUserData(jwt),pid);
+    }
 }
