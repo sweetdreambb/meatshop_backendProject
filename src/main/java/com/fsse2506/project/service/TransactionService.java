@@ -11,5 +11,7 @@ public interface TransactionService {
 
     TransactionResponseData getTransactionById(FirebaseUserData firebaseUserData, Integer tid);
 
-    void updateTransactionStatus(FirebaseUserData firebaseUserData, Integer tid);
+    void updateTransactionStatusProcessing(FirebaseUserData firebaseUserData, Integer tid);
+
+    TransactionResponseData updateTransactionStatusSuccess(FirebaseUserData firebaseUserData, Integer tid);
 }

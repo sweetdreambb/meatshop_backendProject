@@ -10,6 +10,7 @@ import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
 import com.fsse2506.project.exception.transaction.TransactionNotFoundException;
 import com.fsse2506.project.exception.transaction.TransactionStatusNotPrepareException;
+import com.fsse2506.project.exception.transaction.TransactionStatusNotProcessingException;
 import com.fsse2506.project.mapper.transaction.TransactionDataMapper;
 import com.fsse2506.project.repository.TransactionRepository;
 import com.fsse2506.project.service.*;
@@ -97,7 +98,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
     @Override
     @Transactional
-    public void updateTransactionStatus(FirebaseUserData firebaseUserData, Integer tid){
+    public void updateTransactionStatusProcessing(FirebaseUserData firebaseUserData, Integer tid){
         try {
             Optional<TransactionEntity> transactionEntityOptional =
                     transactionRepository.findByUserEntityAndTid(
@@ -120,7 +121,36 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new TransactionStatusNotPrepareException(transactionEntityOptional.get().getStatus());
             }
         } catch (Exception ex) {
-            logger.warn("Update Transaction Failed: {}",ex.getMessage());
+            logger.warn("Update Transaction Status to Processing Failed: {}",ex.getMessage());
+            throw ex;
+        }
+    }
+    @Override
+    @Transactional
+    public TransactionResponseData updateTransactionStatusSuccess(FirebaseUserData firebaseUserData, Integer tid) {
+        try {
+            Optional<TransactionEntity> transactionEntityOptional =
+                    transactionRepository.findByUserEntityAndTid(
+                            userService.getUserEntityByFirebaseUserData(firebaseUserData)
+                            , tid
+                    );
+            if (transactionEntityOptional.isEmpty()) {
+                throw new TransactionNotFoundException(tid);
+            }
+            //check transaction status
+            if (transactionEntityOptional.get().getStatus().equals("PROCESSING")) {
+                transactionEntityOptional.get().setStatus("SUCCESS");
+            } else{
+                throw new TransactionStatusNotProcessingException(transactionEntityOptional.get().getStatus());
+            }
+            return transactionDataMapper.toTransactionResponseData(
+                    transactionEntityOptional.get(),
+                    transactionProductService.getTransactionProductResposneDataList(
+                            transactionEntityOptional.get()
+                    )
+            );
+        } catch (Exception ex) {
+            logger.warn("Update Transaction Status to Success Failed: {}",ex.getMessage());
             throw ex;
         }
     }
