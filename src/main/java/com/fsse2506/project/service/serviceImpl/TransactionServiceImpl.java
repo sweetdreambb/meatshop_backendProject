@@ -8,15 +8,20 @@ import com.fsse2506.project.data.transaction.entity.TransactionEntity;
 import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
-import com.fsse2506.project.exception.TransactionNotFoundException;
+import com.fsse2506.project.exception.transaction.TransactionNotFoundException;
+import com.fsse2506.project.exception.transaction.TransactionStatusNotPrepareException;
 import com.fsse2506.project.mapper.transaction.TransactionDataMapper;
 import com.fsse2506.project.repository.TransactionRepository;
 import com.fsse2506.project.service.*;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -25,16 +30,20 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionProductService transactionProductService;
     private final TransactionDataMapper transactionDataMapper;
     private final CartItemService cartItemService;
+    private final Logger logger= LoggerFactory.getLogger(TransactionServiceImpl.class);
+    private final ProductService productService;
 
-    public TransactionServiceImpl(UserService userService, TransactionRepository transactionRepository, TransactionProductService transactionProductService, TransactionDataMapper transactionDataMapper, CartItemService cartItemService) {
+    public TransactionServiceImpl(UserService userService, TransactionRepository transactionRepository, TransactionProductService transactionProductService, TransactionDataMapper transactionDataMapper, CartItemService cartItemService, ProductService productService) {
         this.userService = userService;
         this.transactionRepository = transactionRepository;
         this.transactionProductService = transactionProductService;
         this.transactionDataMapper = transactionDataMapper;
         this.cartItemService = cartItemService;
+        this.productService = productService;
     }
 
     @Override
+    @Transactional
     public TransactionResponseData createTransaction(
             FirebaseUserData firebaseUserData){
 
@@ -62,7 +71,8 @@ public class TransactionServiceImpl implements TransactionService {
                         transactionEntity,
                         cartItemResponseDataList
                 );
-        for (TransactionProductResponseData transactionProductResponseData: transactionProductResponseDataList){
+        for (TransactionProductResponseData transactionProductResponseData:
+                transactionProductResponseDataList){
             cartItemService.removeCartItem(
                     firebaseUserData
                     ,transactionProductResponseData.getProductResponseData().getPid()
@@ -84,5 +94,34 @@ public class TransactionServiceImpl implements TransactionService {
                         transactionEntity
                 )
         );
+    }
+    @Override
+    @Transactional
+    public void updateTransactionStatus(FirebaseUserData firebaseUserData, Integer tid){
+        try {
+            Optional<TransactionEntity> transactionEntityOptional =
+                    transactionRepository.findByUserEntityAndTid(
+                            userService.getUserEntityByFirebaseUserData(firebaseUserData)
+                            , tid
+                    );
+            if (transactionEntityOptional.isEmpty()) {
+                throw new TransactionNotFoundException(tid);
+            }
+            //check transaction status
+            if (transactionEntityOptional.get().getStatus().equals("PREPARE")) {
+                //check stock availability and deduct stock
+                productService.paymentProcessingAndDeductStock(
+                        transactionProductService.getTransactionProductResposneDataList(
+                                transactionEntityOptional.get()
+                        )
+                );
+                transactionEntityOptional.get().setStatus("PROCESSING");
+            } else{
+                throw new TransactionStatusNotPrepareException(transactionEntityOptional.get().getStatus());
+            }
+        } catch (Exception ex) {
+            logger.warn("Update Transaction Failed: {}",ex.getMessage());
+            throw ex;
+        }
     }
 }

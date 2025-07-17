@@ -3,11 +3,13 @@ package com.fsse2506.project.service.serviceImpl;
 import com.fsse2506.project.data.product.domainObject.response.GetAllProductResponseData;
 import com.fsse2506.project.data.product.domainObject.response.ProductResponseData;
 import com.fsse2506.project.data.product.entity.ProductEntity;
+import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 import com.fsse2506.project.exception.product.ProductNotFoundException;
+import com.fsse2506.project.exception.transactionProduct.TransactionProductExceedStockException;
 import com.fsse2506.project.mapper.product.ProductDataMapper;
-import com.fsse2506.project.mapper.product.ProductEntityMapper;
 import com.fsse2506.project.repository.ProductRepository;
 import com.fsse2506.project.service.ProductService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -54,5 +56,26 @@ public class ProductServiceImpl implements ProductService {
         return productDataMapper.toProductResponseDataList(
                 productEntityList
         );
+    }
+    @Transactional
+    @Override
+    public void paymentProcessingAndDeductStock(List<TransactionProductResponseData> transactionProductResponseDataList){
+        try {
+            for (TransactionProductResponseData transactionProductResponseData : transactionProductResponseDataList) {
+                ProductEntity productEntity = getProductEntityByPid(
+                        transactionProductResponseData.getProductResponseData().getPid()
+                );
+                Integer stock = productEntity.getStock();
+                Integer quantity = transactionProductResponseData.getQuantity();
+                if (stock < quantity) {
+                    throw new TransactionProductExceedStockException(transactionProductResponseData.getTpid());
+                }
+                productEntity.setStock(stock - quantity);
+                productRepository.save(productEntity);
+            }
+        } catch(Exception ex){
+            logger.warn("Payment Processing and deduct stock failed: {}",ex.getMessage());
+            throw ex;
+        }
     }
 }

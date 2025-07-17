@@ -31,7 +31,10 @@ public class TransactionProductServiceImpl implements TransactionProductService 
     }
     @Override
     @Transactional
-    public List<TransactionProductResponseData> createTransactionProductResponseDataList(TransactionEntity transactionEntity, List<CartItemResponseData> cartItemResponseDataList){
+    public List<TransactionProductResponseData> createTransactionProductResponseDataList(
+            TransactionEntity transactionEntity
+            , List<CartItemResponseData> cartItemResponseDataList
+    ){
         //convert cartItemList to transactionProductEntityList
         List<TransactionProductEntity> transactionProductEntityList
                 =transactionProductEntityMapper.toTransactionProductEntityList(
@@ -53,17 +56,19 @@ public class TransactionProductServiceImpl implements TransactionProductService 
         );
     }
     @Override
-    public List<TransactionProductResponseData> getTransactionProductResposneDataList(TransactionEntity transactionEntity){
+    public List<TransactionProductResponseData> getTransactionProductResposneDataList(
+            TransactionEntity transactionEntity){
         List<TransactionProductEntity> transactionProductEntityList=
                 transactionProductRepository.findAllByTransactionEntity(transactionEntity);
         //convert transactionProductEntityList to productEntityList
-        List<ProductEntity> productEntityList=
-                getProductEntityList(transactionProductEntityList);
         return transactionProductDataMapper.toTransactionProductResponseDataList(
                 transactionProductEntityList,
-                productService.getProductResponseDataList(productEntityList)
+                productService.getProductResponseDataList(
+                        getProductEntityList(transactionProductEntityList)
+                )
         );
     }
+    @Override
     public List<ProductEntity> getProductEntityList(List<TransactionProductEntity> transactionProductEntityList){
         //convert transactionProductEntityList to productEntityList
         List<ProductEntity> productEntityList=new ArrayList<>();

@@ -16,9 +16,5 @@ import java.util.Optional;
 public interface CartItemRepository extends CrudRepository<CartItemEntity, Integer> {
         List<CartItemEntity> findByUserEntity(UserEntity userEntity);
     Optional<CartItemEntity> findByUserEntityAndProductEntity(UserEntity userEntity, ProductEntity productEntity);
-
-    @Transactional
-    @Modifying
-    @Query("DELETE FROM CartItemEntity c WHERE c.userEntity.email = :email AND c.productEntity.pid = :pid")
-    Integer deleteByEmailAndPid(@Param("email") String email, @Param("pid") Integer pid);
+    Integer deleteByUserEntity_EmailAndProductEntity_Pid(String email, Integer pid);
 }

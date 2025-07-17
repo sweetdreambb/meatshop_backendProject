@@ -10,4 +10,6 @@ public interface TransactionService {
             FirebaseUserData firebaseUserData);
 
     TransactionResponseData getTransactionById(FirebaseUserData firebaseUserData, Integer tid);
+
+    void updateTransactionStatus(FirebaseUserData firebaseUserData, Integer tid);
 }

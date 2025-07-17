@@ -4,6 +4,7 @@ import com.fsse2506.project.data.transaction.dto.response.TransactionResponseDto
 import com.fsse2506.project.mapper.transaction.TransactionDtoMapper;
 import com.fsse2506.project.mapper.user.UserDataMapper;
 import com.fsse2506.project.service.TransactionService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -40,4 +41,12 @@ public class TransactionController {
                 )
         );
     }
+    @PatchMapping("/{tid}/payment")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateTransactionStatusProcessing(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer tid){
+        transactionService.updateTransactionStatus(userDataMapper.toFirebaseUserData(jwt),tid);
+    }
+    @PatchMapping("/{tid}/success")
+    @ResponseStatus(HttpStatus.OK)
+    public
 }

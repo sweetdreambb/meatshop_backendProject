@@ -93,18 +93,19 @@ public class CartItemServiceImpl implements CartItemService {
                 throw new CartItemExceedStockException(pid);
             }
             cartItemEntity.setQuantity(quantity);
-            //cartItemRepository.save(cartItemEntity);
+            cartItemRepository.save(cartItemEntity);
         } catch (Exception ex) {
             logger.warn("Update Cart Quantity failed: {}", ex.getMessage());
             throw ex;
         }
     }
     @Override
+    @Transactional
     public void removeCartItem(FirebaseUserData firebaseUserData, Integer pid){
         try{
             String email= firebaseUserData.getEmail();
             Integer result=
-                    cartItemRepository.deleteByEmailAndPid(
+                    cartItemRepository.deleteByUserEntity_EmailAndProductEntity_Pid(
                             email, pid
                     );
             if (result==0){
