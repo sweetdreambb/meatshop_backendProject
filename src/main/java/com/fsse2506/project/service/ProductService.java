@@ -15,6 +15,5 @@ public interface ProductService {
 
     ProductEntity getProductEntityByPid(Integer pid);
 
-    List<ProductResponseData> getProductResponseDataList(List<TransactionProductEntity> transactionProductEntityList);
-
+    List<ProductResponseData> getProductResponseDataList(List<ProductEntity> productEntityList);
 }

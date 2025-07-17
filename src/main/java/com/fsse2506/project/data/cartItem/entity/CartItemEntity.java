@@ -22,7 +22,7 @@ public class CartItemEntity {
     @ManyToOne
     @JoinColumn(name="uid", nullable = false)
     private UserEntity userEntity;
+    @Column(nullable = false)
     @Min(0)
     private Integer quantity;
-
 }

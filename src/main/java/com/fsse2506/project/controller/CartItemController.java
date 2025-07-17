@@ -4,6 +4,7 @@ import com.fsse2506.project.data.cartItem.dto.response.CartItemResponseDto;
 import com.fsse2506.project.mapper.cartItem.CartItemDtoMapper;
 import com.fsse2506.project.mapper.user.UserDataMapper;
 import com.fsse2506.project.service.CartItemService;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,7 +27,7 @@ public class CartItemController {
 
     @PutMapping("/{pid}/{quantity}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void putCartItem(@PathVariable Integer pid, @PathVariable Integer quantity, @AuthenticationPrincipal Jwt jwt){
+    public void putCartItem(@PathVariable Integer pid, @Positive @PathVariable Integer quantity, @AuthenticationPrincipal Jwt jwt){
         cartItemService.putCartItem(
                 pid
                 ,quantity
@@ -35,16 +36,16 @@ public class CartItemController {
     }
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CartItemResponseDto> getAllCartItem(@AuthenticationPrincipal Jwt jwt){
+    public List<CartItemResponseDto> getUserCart(@AuthenticationPrincipal Jwt jwt){
         return cartItemDtoMapper.toCartItemResponseDtoList(
-                cartItemService.getAllCartItem(
+                cartItemService.getUserCart(
                         userDataMapper.toFirebaseUserData(jwt)
                 )
         );
     }
     @PatchMapping("/{pid}/{quantity}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateCartQuantity(@AuthenticationPrincipal Jwt jwt,@PathVariable Integer pid, @PathVariable Integer quantity){
+    public void updateCartQuantity(@AuthenticationPrincipal Jwt jwt,@PathVariable Integer pid, @Positive @PathVariable Integer quantity){
         cartItemService.updateCartQuantity(userDataMapper.toFirebaseUserData(jwt),pid,quantity);
     }
     @DeleteMapping("/{pid}")

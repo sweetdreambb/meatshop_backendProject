@@ -8,4 +8,6 @@ public interface TransactionService {
 
     TransactionResponseData createTransaction(
             FirebaseUserData firebaseUserData);
+
+    TransactionResponseData getTransactionById(FirebaseUserData firebaseUserData, Integer tid);
 }

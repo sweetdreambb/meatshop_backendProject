@@ -3,8 +3,7 @@ package com.fsse2506.project.service.serviceImpl;
 import com.fsse2506.project.data.product.domainObject.response.GetAllProductResponseData;
 import com.fsse2506.project.data.product.domainObject.response.ProductResponseData;
 import com.fsse2506.project.data.product.entity.ProductEntity;
-import com.fsse2506.project.data.transactionProduct.entity.TransactionProductEntity;
-import com.fsse2506.project.exception.ProductNotFoundException;
+import com.fsse2506.project.exception.product.ProductNotFoundException;
 import com.fsse2506.project.mapper.product.ProductDataMapper;
 import com.fsse2506.project.mapper.product.ProductEntityMapper;
 import com.fsse2506.project.repository.ProductRepository;
@@ -20,13 +19,13 @@ public class ProductServiceImpl implements ProductService {
     private final ProductDataMapper productDataMapper;
     private final ProductRepository productRepository;
     private final Logger logger= LoggerFactory.getLogger(ProductServiceImpl.class);
-    private final ProductEntityMapper productEntityMapper;
 
-    public ProductServiceImpl(ProductDataMapper productDataMapper, ProductRepository productRepository, ProductEntityMapper productEntityMapper) {
+    public ProductServiceImpl(ProductDataMapper productDataMapper, ProductRepository productRepository) {
         this.productDataMapper = productDataMapper;
         this.productRepository = productRepository;
-        this.productEntityMapper = productEntityMapper;
     }
+
+
     @Override
     public List<GetAllProductResponseData> getAllProducts(){
         return productDataMapper.toGetAllProductResponseDataList(
@@ -51,11 +50,9 @@ public class ProductServiceImpl implements ProductService {
         );
     }
     @Override
-    public List<ProductResponseData> getProductResponseDataList(List<TransactionProductEntity> transactionProductEntityList){
+    public List<ProductResponseData> getProductResponseDataList(List<ProductEntity> productEntityList){
         return productDataMapper.toProductResponseDataList(
-                productEntityMapper.toProductEntityList(
-                        transactionProductEntityList
-                )
+                productEntityList
         );
     }
 }

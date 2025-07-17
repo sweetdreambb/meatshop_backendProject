@@ -4,5 +4,5 @@ import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
 
 public interface UserService {
-    UserEntity getUserEntityByEmail(FirebaseUserData firebaseUserData);
+    UserEntity getUserEntityByFirebaseUserData(FirebaseUserData firebaseUserData);
 }

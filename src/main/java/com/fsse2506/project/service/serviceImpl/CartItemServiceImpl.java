@@ -5,20 +5,22 @@ import com.fsse2506.project.data.cartItem.entity.CartItemEntity;
 import com.fsse2506.project.data.product.entity.ProductEntity;
 import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
-import com.fsse2506.project.exception.ProductExceedStockException;
-import com.fsse2506.project.exception.ProductNotFoundException;
-import com.fsse2506.project.exception.UpdateProductQuantityNegativeException;
+import com.fsse2506.project.exception.cartItem.CartItemDeleteFailException;
+import com.fsse2506.project.exception.cartItem.CartItemExceedStockException;
+import com.fsse2506.project.exception.cartItem.CartItemNotFoundException;
 import com.fsse2506.project.mapper.cartItem.CartItemDataMapper;
 import com.fsse2506.project.mapper.cartItem.CartItemEntityMapper;
 import com.fsse2506.project.repository.CartItemRepository;
 import com.fsse2506.project.service.CartItemService;
 import com.fsse2506.project.service.ProductService;
 import com.fsse2506.project.service.UserService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {
@@ -38,45 +40,60 @@ public class CartItemServiceImpl implements CartItemService {
         this.cartItemDataMapper = cartItemDataMapper;
     }
     @Override
+    @Transactional
     public void putCartItem(Integer pid, Integer quantity, FirebaseUserData firebaseUserData){
         try {
-            Integer stock = productService.getProductByPid(pid).getStock();
-            if (quantity > stock) {
-                throw new ProductExceedStockException(stock);
+            UserEntity userEntity=userService.getUserEntityByFirebaseUserData(firebaseUserData);
+            ProductEntity productEntity=productService.getProductEntityByPid(pid);
+            Optional<CartItemEntity> cartItemEntityOptional=
+                    cartItemRepository.findByUserEntityAndProductEntity(userEntity,productEntity);
+            //cart item not exist, add new cart item
+            if (cartItemEntityOptional.isEmpty()){
+                if (quantity>productEntity.getStock()){
+                    throw new CartItemExceedStockException(pid);
+                }
+                cartItemRepository.save(
+                        cartItemEntityMapper.toCartItemEntity(
+                                quantity,userEntity,productEntity
+                        )
+                );
+            } else {
+                // cart item exists, check stock availability
+                CartItemEntity cartItemEntity=cartItemEntityOptional.get();
+                if (cartItemEntity.getQuantity()+quantity > productEntity.getStock()) {
+                    throw new CartItemExceedStockException(pid);
+                }
+                cartItemEntity.setQuantity(cartItemEntity.getQuantity()+quantity);
             }
-            cartItemRepository.save(
-                    cartItemEntityMapper.toCartItemEntity(
-                            quantity
-                            , userService.getUserEntityByEmail(firebaseUserData)
-                            , productService.getProductEntityByPid(pid)
-                    )
-            );
         } catch (Exception ex){
             logger.warn("Add item to cart failed: {}", ex.getMessage());
             throw ex;
         }
     }
     @Override
-    public List<CartItemResponseData> getAllCartItem(FirebaseUserData firebaseUserData){
+    public List<CartItemResponseData> getUserCart(FirebaseUserData firebaseUserData){
         return cartItemDataMapper.toCartItemResponseDataList(
                 cartItemRepository.findByUserEntity(
-                        userService.getUserEntityByEmail(firebaseUserData)
+                        userService.getUserEntityByFirebaseUserData(firebaseUserData)
                 )
         );
     }
     @Override
+    @Transactional
     public void updateCartQuantity(FirebaseUserData firebaseUserData, Integer pid, Integer quantity) {
         try {
-            if (quantity < 0) {
-                throw new UpdateProductQuantityNegativeException(quantity);
-            }
-
+            UserEntity userEntity=userService.getUserEntityByFirebaseUserData(firebaseUserData);
+            ProductEntity productEntity=productService.getProductEntityByPid(pid);
             CartItemEntity cartItemEntity = getCartItemEntity(
-                    userService.getUserEntityByEmail(firebaseUserData)
-                    , productService.getProductEntityByPid(pid)
+                    userEntity
+                    , productEntity
             );
+            // check stock
+            if(productEntity.getStock()<quantity){
+                throw new CartItemExceedStockException(pid);
+            }
             cartItemEntity.setQuantity(quantity);
-            cartItemRepository.save(cartItemEntity);
+            //cartItemRepository.save(cartItemEntity);
         } catch (Exception ex) {
             logger.warn("Update Cart Quantity failed: {}", ex.getMessage());
             throw ex;
@@ -85,9 +102,14 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public void removeCartItem(FirebaseUserData firebaseUserData, Integer pid){
         try{
-            cartItemRepository.delete(getCartItemEntity(
-                    userService.getUserEntityByEmail(firebaseUserData)
-                    , productService.getProductEntityByPid(pid)));
+            String email= firebaseUserData.getEmail();
+            Integer result=
+                    cartItemRepository.deleteByEmailAndPid(
+                            email, pid
+                    );
+            if (result==0){
+                throw new CartItemDeleteFailException(email, pid);
+            }
         }catch (Exception ex){
             logger.warn("Remove Cart Item failed: {}",ex.getMessage());
             throw ex;
@@ -98,9 +120,10 @@ public class CartItemServiceImpl implements CartItemService {
                 userEntity
                 ,productEntity
         ).orElseThrow(
-                () -> new ProductNotFoundException(
-                        productEntity.getPid()
+                () -> new CartItemNotFoundException(
+                        userEntity.getUid(),productEntity.getPid()
                 )
         );
     }
+
 }

@@ -17,7 +17,7 @@ public class UserServiceImpl implements UserService {
         this.userEntityMapper = userEntityMapper;
     }
     @Override
-    public UserEntity getUserEntityByEmail(FirebaseUserData firebaseUserData){
+    public UserEntity getUserEntityByFirebaseUserData(FirebaseUserData firebaseUserData){
 
         return userRepository.findByEmail(firebaseUserData.getEmail())
                 .orElseGet(() -> userRepository.save(

@@ -5,8 +5,10 @@ import com.fsse2506.project.data.cartItem.domainObject.response.CartItemResponse
 import com.fsse2506.project.data.transaction.domainObject.response.TransactionResponseData;
 import com.fsse2506.project.data.transaction.entity.TransactionEntity;
 
+import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
+import com.fsse2506.project.exception.TransactionNotFoundException;
 import com.fsse2506.project.mapper.transaction.TransactionDataMapper;
 import com.fsse2506.project.repository.TransactionRepository;
 import com.fsse2506.project.service.*;
@@ -37,10 +39,10 @@ public class TransactionServiceImpl implements TransactionService {
             FirebaseUserData firebaseUserData){
 
         UserEntity userEntity=
-                userService.getUserEntityByEmail(firebaseUserData);
+                userService.getUserEntityByFirebaseUserData(firebaseUserData);
 
         List<CartItemResponseData> cartItemResponseDataList=
-                cartItemService.getAllCartItem(firebaseUserData);
+                cartItemService.getUserCart(firebaseUserData);
 
         BigDecimal total=BigDecimal.ZERO;
         for (CartItemResponseData cartItemResponseData: cartItemResponseDataList){
@@ -48,19 +50,39 @@ public class TransactionServiceImpl implements TransactionService {
             BigDecimal price=cartItemResponseData.getPrice();
             total=total.add(quantity.multiply(price));
         }
-
         TransactionEntity transactionEntity=new TransactionEntity();
         transactionEntity.setUserEntity(userEntity);
         transactionEntity.setDatetime(LocalDateTime.now());
         transactionEntity.setStatus("PREPARE");
         transactionEntity.setTotal(total);
-        transactionRepository.save(transactionEntity);
-        return transactionDataMapper.toTransactionResponseData(
-                transactionEntity,transactionProductService.createTransactionProductResponseDataList(
+        transactionEntity=transactionRepository.save(transactionEntity);
+        List<TransactionProductResponseData> transactionProductResponseDataList
+                =transactionProductService
+                .createTransactionProductResponseDataList(
                         transactionEntity,
                         cartItemResponseDataList
+                );
+        for (TransactionProductResponseData transactionProductResponseData: transactionProductResponseDataList){
+            cartItemService.removeCartItem(
+                    firebaseUserData
+                    ,transactionProductResponseData.getProductResponseData().getPid()
+            );
+        }
+        return transactionDataMapper.toTransactionResponseData(
+                transactionEntity,
+                transactionProductResponseDataList
+        );
+    }
+    @Override
+    public TransactionResponseData getTransactionById(FirebaseUserData firebaseUserData, Integer tid){
+        TransactionEntity transactionEntity=transactionRepository.findById(tid).orElseThrow(
+                ()-> new TransactionNotFoundException(tid)
+        );
+        return transactionDataMapper.toTransactionResponseData(
+                transactionEntity,
+                transactionProductService.getTransactionProductResposneDataList(
+                        transactionEntity
                 )
         );
     }
-
 }

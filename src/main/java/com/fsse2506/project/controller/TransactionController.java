@@ -1,7 +1,6 @@
 package com.fsse2506.project.controller;
 
 import com.fsse2506.project.data.transaction.dto.response.TransactionResponseDto;
-import com.fsse2506.project.mapper.transaction.TransactionDataMapper;
 import com.fsse2506.project.mapper.transaction.TransactionDtoMapper;
 import com.fsse2506.project.mapper.user.UserDataMapper;
 import com.fsse2506.project.service.TransactionService;
@@ -29,6 +28,16 @@ public class TransactionController {
                 transactionService.createTransaction(
                 userDataMapper.toFirebaseUserData(jwt)
             )
+        );
+    }
+    @GetMapping("/{tid}")
+    @ResponseStatus(HttpStatus.OK)
+    public TransactionResponseDto getTransactionById(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer tid){
+        return transactionDtoMapper.toTransactionResponseDto(
+                transactionService.getTransactionById(
+                        userDataMapper.toFirebaseUserData(jwt),
+                        tid
+                )
         );
     }
 }
