@@ -13,12 +13,7 @@ public interface TransactionDtoMapper {
 
     @Mapping(target="transactionProductResponseDtoList",source="transactionProductResponseDataList")
     TransactionResponseDto toTransactionResponseDto (TransactionResponseData transactionResponseData);
-//
-//        transactionResponseDto.setTid(transactionResponseData.getTid());
-//        transactionResponseDto.setBuyerUid(transactionResponseData.getBuyerUid());
-//        transactionResponseDto.setDatetime(transactionResponseData.getDatetime());
-//        transactionResponseDto.setStatus(transactionResponseData.getStatus());
-//        transactionResponseDto.setTotal(transactionResponseData.getTotal());
+
 //        transactionResponseDto.setTransactionProductResponseDtoList(
 //                transactionProductDtoMapper.toTransactionProductResponseDtoList(
 //                        transactionResponseData.getTransactionProductResponseDataList()

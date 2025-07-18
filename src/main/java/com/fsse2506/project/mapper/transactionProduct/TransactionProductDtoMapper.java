@@ -3,38 +3,30 @@ package com.fsse2506.project.mapper.transactionProduct;
 import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 import com.fsse2506.project.data.transactionProduct.dto.response.TransactionProductResponseDto;
 import com.fsse2506.project.mapper.product.ProductDtoMapper;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
-public class TransactionProductDtoMapper {
+@Mapper(uses=ProductDtoMapper.class, componentModel="spring")
+public interface TransactionProductDtoMapper {
 
-    private final ProductDtoMapper productDtoMapper;
+    ProductDtoMapper INSTANCE= Mappers.getMapper(ProductDtoMapper.class);
 
-    public TransactionProductDtoMapper(ProductDtoMapper productDtoMapper) {
+    @Mapping(target="productResponseDto", source="productResponseData")
+    TransactionProductResponseDto toTransactionProductResponseDto(TransactionProductResponseData transactionProductResponseData);
 
-        this.productDtoMapper = productDtoMapper;
-    }
+//        transactionProductResponseDto.setProductResponseDto(
+//                productDtoMapper.toProductResponseDto(
+//                        transactionProductResponseData.getProductResponseData()
+//                )
+//        );
 
-    public TransactionProductResponseDto toTransactionProductResponseDto(TransactionProductResponseData transactionProductResponseData){
-        TransactionProductResponseDto transactionProductResponseDto=new TransactionProductResponseDto();
-        transactionProductResponseDto.setTpid(transactionProductResponseData.getTpid());
-        transactionProductResponseDto.setProductResponseDto(
-                productDtoMapper.toProductResponseDto(
-                        transactionProductResponseData.getProductResponseData()
-                )
-        );
-        transactionProductResponseDto.setSubtotal(transactionProductResponseData.getSubtotal());
-        transactionProductResponseDto.setQuantity(transactionProductResponseData.getQuantity());
-        return transactionProductResponseDto;
-    }
-    public List<TransactionProductResponseDto> toTransactionProductResponseDtoList(List<TransactionProductResponseData> transactionProductResponseDataList){
-        List<TransactionProductResponseDto> transactionProductResponseDtoList=new ArrayList<>();
-        for (TransactionProductResponseData transactionProductResponseData: transactionProductResponseDataList){
-            transactionProductResponseDtoList.add(toTransactionProductResponseDto(transactionProductResponseData));
-        }
-        return transactionProductResponseDtoList;
-    }
+    List<TransactionProductResponseDto> toTransactionProductResponseDtoList(
+            List<TransactionProductResponseData> transactionProductResponseDataList
+    );
+
 }

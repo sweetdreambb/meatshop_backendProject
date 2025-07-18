@@ -24,18 +24,6 @@ public interface TransactionProductDataMapper {
     default BigDecimal calculateSubtotal(BigDecimal price, Integer quantity){
         return price.multiply(BigDecimal.valueOf(quantity));
     }
-//        transactionProductResponseData.setTpid(transactionProductEntity.getTpid());
-//        transactionProductResponseData.setProductResponseData(productResponseData);
-//        transactionProductResponseData.setQuantity(
-//                transactionProductEntity.getQuantity()
-//        );
-//        transactionProductResponseData.setSubtotal(
-//                productResponseData.getPrice().multiply(
-//                        BigDecimal.valueOf(transactionProductEntity.getQuantity()
-//                        )
-//                )
-//        );
-//
     default List<TransactionProductResponseData> toTransactionProductResponseDataList(
             List<TransactionProductEntity> transactionProductEntityList,
             List<ProductResponseData> productResponseDataList
@@ -51,18 +39,4 @@ public interface TransactionProductDataMapper {
         }
         return transactionProductResponseDataList;
     }
-
-//    public List<TransactionProductResponseData> toTransactionProductResponseDataList(List<TransactionProductEntity> transactionProductEntityList, List<ProductResponseData> productResponseDataList){
-//        List<TransactionProductResponseData> transactionProductResponseDataList=new ArrayList<>();
-//        for (int i=0; i<transactionProductEntityList.size(); i++){
-//            transactionProductResponseDataList.add(
-//                    toTransactionProductResponseData(
-//                            transactionProductEntityList.get(i),
-//                            productResponseDataList.get(i)
-//                    )
-//            );
-//        }
-//        return transactionProductResponseDataList;
-//    }
-
 }
