@@ -9,7 +9,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CartItemDataMapper {
-
     @Mapping(source = "productEntity.pid", target = "pid")
     @Mapping(source = "productEntity.name", target = "name")
     @Mapping(source = "productEntity.imageUrl", target = "imageUrl")
