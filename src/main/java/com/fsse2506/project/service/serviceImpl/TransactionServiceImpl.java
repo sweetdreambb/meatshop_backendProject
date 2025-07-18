@@ -15,6 +15,7 @@ import com.fsse2506.project.mapper.transaction.TransactionDataMapper;
 import com.fsse2506.project.repository.TransactionRepository;
 import com.fsse2506.project.service.*;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class TransactionServiceImpl implements TransactionService {
     private final UserService userService;
@@ -33,15 +35,6 @@ public class TransactionServiceImpl implements TransactionService {
     private final CartItemService cartItemService;
     private final Logger logger= LoggerFactory.getLogger(TransactionServiceImpl.class);
     private final ProductService productService;
-
-    public TransactionServiceImpl(UserService userService, TransactionRepository transactionRepository, TransactionProductService transactionProductService, TransactionDataMapper transactionDataMapper, CartItemService cartItemService, ProductService productService) {
-        this.userService = userService;
-        this.transactionRepository = transactionRepository;
-        this.transactionProductService = transactionProductService;
-        this.transactionDataMapper = transactionDataMapper;
-        this.cartItemService = cartItemService;
-        this.productService = productService;
-    }
 
     @Override
     @Transactional

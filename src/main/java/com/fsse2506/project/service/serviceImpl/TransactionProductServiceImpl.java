@@ -11,11 +11,13 @@ import com.fsse2506.project.repository.TransactionProductRepository;
 import com.fsse2506.project.service.ProductService;
 import com.fsse2506.project.service.TransactionProductService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class TransactionProductServiceImpl implements TransactionProductService {
     private final TransactionProductEntityMapper transactionProductEntityMapper;
@@ -23,12 +25,6 @@ public class TransactionProductServiceImpl implements TransactionProductService 
     private final TransactionProductRepository transactionProductRepository;
     private final TransactionProductDataMapper transactionProductDataMapper;
 
-    public TransactionProductServiceImpl(TransactionProductEntityMapper transactionProductEntityMapper, ProductService productService, TransactionProductRepository transactionProductRepository, TransactionProductDataMapper transactionProductDataMapper) {
-        this.transactionProductEntityMapper = transactionProductEntityMapper;
-        this.productService = productService;
-        this.transactionProductRepository = transactionProductRepository;
-        this.transactionProductDataMapper = transactionProductDataMapper;
-    }
     @Override
     @Transactional
     public List<TransactionProductResponseData> createTransactionProductResponseDataList(

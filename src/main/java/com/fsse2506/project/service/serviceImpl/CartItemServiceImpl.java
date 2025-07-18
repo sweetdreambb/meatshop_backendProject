@@ -15,6 +15,7 @@ import com.fsse2506.project.service.CartItemService;
 import com.fsse2506.project.service.ProductService;
 import com.fsse2506.project.service.UserService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,23 +23,16 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class CartItemServiceImpl implements CartItemService {
     private final UserService userService;
     private final ProductService productService;
     private final CartItemEntityMapper cartItemEntityMapper;
-    private final CartItemRepository cartItemRepository;
     private final CartItemDataMapper cartItemDataMapper;
+    private final CartItemRepository cartItemRepository;
     private final Logger logger= LoggerFactory.getLogger(CartItemServiceImpl.class);
 
-
-    public CartItemServiceImpl(UserService userService, ProductService productService, CartItemEntityMapper cartItemEntityMapper, CartItemRepository cartItemRepository, CartItemDataMapper cartItemDataMapper) {
-        this.userService = userService;
-        this.productService = productService;
-        this.cartItemEntityMapper = cartItemEntityMapper;
-        this.cartItemRepository = cartItemRepository;
-        this.cartItemDataMapper = cartItemDataMapper;
-    }
     @Override
     @Transactional
     public void putCartItem(Integer pid, Integer quantity, FirebaseUserData firebaseUserData){

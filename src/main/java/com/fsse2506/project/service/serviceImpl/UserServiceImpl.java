@@ -5,17 +5,15 @@ import com.fsse2506.project.data.user.entity.UserEntity;
 import com.fsse2506.project.mapper.user.UserEntityMapper;
 import com.fsse2506.project.repository.UserRepository;
 import com.fsse2506.project.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserEntityMapper userEntityMapper;
 
-    public UserServiceImpl(UserRepository userRepository, UserEntityMapper userEntityMapper) {
-        this.userRepository = userRepository;
-        this.userEntityMapper = userEntityMapper;
-    }
     @Override
     public UserEntity getUserEntityByFirebaseUserData(FirebaseUserData firebaseUserData){
 

@@ -4,14 +4,16 @@ import com.fsse2506.project.data.product.entity.ProductEntity;
 import com.fsse2506.project.data.user.entity.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 
 @Entity
 @Table(name="cart_item")
-@Data
-@NoArgsConstructor @AllArgsConstructor
+@Getter @Setter
+@Data  // Add this annotation
 public class CartItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -10,23 +10,19 @@ import com.fsse2506.project.mapper.product.ProductDataMapper;
 import com.fsse2506.project.repository.ProductRepository;
 import com.fsse2506.project.service.ProductService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class ProductServiceImpl implements ProductService {
     private final ProductDataMapper productDataMapper;
     private final ProductRepository productRepository;
     private final Logger logger= LoggerFactory.getLogger(ProductServiceImpl.class);
-
-    public ProductServiceImpl(ProductDataMapper productDataMapper, ProductRepository productRepository) {
-        this.productDataMapper = productDataMapper;
-        this.productRepository = productRepository;
-    }
-
 
     @Override
     public List<GetAllProductResponseData> getAllProducts(){

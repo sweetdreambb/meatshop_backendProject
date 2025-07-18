@@ -8,8 +8,9 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name="product")
-@Data
-@NoArgsConstructor @AllArgsConstructor
+@Getter @Setter
+@Data  // Add this annotation
+
 public class ProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
