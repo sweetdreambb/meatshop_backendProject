@@ -1,9 +1,9 @@
 package com.fsse2506.project.data.user.domainObject.request;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-
+@Getter @Setter
 public class FirebaseUserData {
     private String firebaseUid;
     private String email;

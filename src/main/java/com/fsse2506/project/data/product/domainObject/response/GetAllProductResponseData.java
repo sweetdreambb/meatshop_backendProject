@@ -4,8 +4,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
-
+@Getter @Setter
 public class GetAllProductResponseData {
 
     private Integer pid;

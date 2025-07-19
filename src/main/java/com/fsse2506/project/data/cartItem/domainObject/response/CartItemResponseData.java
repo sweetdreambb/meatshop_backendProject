@@ -1,10 +1,10 @@
 package com.fsse2506.project.data.cartItem.domainObject.response;
 
-
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
-@Data
+@Getter @Setter
 public class CartItemResponseData {
     private Integer pid;
     private String name;

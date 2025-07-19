@@ -2,11 +2,11 @@ package com.fsse2506.project.data.transactionProduct.dto.response;
 
 import com.fsse2506.project.data.product.dto.response.ProductResponseDto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
-@Data
-
+@Getter @Setter
 public class TransactionProductResponseDto {
     private Integer tpid;
     private ProductResponseDto productResponseDto;
