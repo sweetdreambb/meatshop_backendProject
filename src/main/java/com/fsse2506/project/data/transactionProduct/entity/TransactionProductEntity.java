@@ -4,14 +4,15 @@ import com.fsse2506.project.data.transaction.entity.TransactionEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name="transaction_product")
+@Table(name="transaction_product", indexes={
+        @Index(name="idx_transaction_product_tid_pid", columnList = "tid,pid")
+})
 @Getter @Setter
 
 public class TransactionProductEntity {

@@ -9,7 +9,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name="cart_item")
+@Table(name="cart_item", indexes={
+        @Index(name="idx_cart_user_product",columnList="uid,pid")
+})
 @Getter
 @Setter
 public class CartItemEntity {
