@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface CartItemService {
 
-
     void putCartItem(Integer pid, Integer quantity, FirebaseUserData firebaseUserData);
 
     List<CartItemResponseData> getUserCart(FirebaseUserData firebaseUserData);

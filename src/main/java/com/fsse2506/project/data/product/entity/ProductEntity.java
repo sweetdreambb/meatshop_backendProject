@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 @Entity
 @Table(name="product")
 @Getter @Setter
-@Data  // Add this annotation
 
 public class ProductEntity {
     @Id

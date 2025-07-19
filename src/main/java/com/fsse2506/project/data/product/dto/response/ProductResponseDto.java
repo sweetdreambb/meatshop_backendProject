@@ -1,8 +1,6 @@
 package com.fsse2506.project.data.product.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 @Data

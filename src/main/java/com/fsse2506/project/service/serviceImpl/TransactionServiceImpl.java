@@ -5,6 +5,7 @@ import com.fsse2506.project.data.cartItem.domainObject.response.CartItemResponse
 import com.fsse2506.project.data.transaction.domainObject.response.TransactionResponseData;
 import com.fsse2506.project.data.transaction.entity.TransactionEntity;
 
+import com.fsse2506.project.data.transaction.status.Status;
 import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
@@ -56,9 +57,10 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionEntity transactionEntity=new TransactionEntity();
         transactionEntity.setUserEntity(userEntity);
         transactionEntity.setDatetime(LocalDateTime.now());
-        transactionEntity.setStatus("PREPARE");
+        transactionEntity.setStatus(Status.PREPARE);
         transactionEntity.setTotal(total);
         transactionEntity=transactionRepository.save(transactionEntity);
+
         List<TransactionProductResponseData> transactionProductResponseDataList
                 =transactionProductService
                 .createTransactionProductResponseDataList(
@@ -79,16 +81,22 @@ public class TransactionServiceImpl implements TransactionService {
     }
     @Override
     public TransactionResponseData getTransactionById(FirebaseUserData firebaseUserData, Integer tid){
-        TransactionEntity transactionEntity=transactionRepository.findById(tid).orElseThrow(
-                ()-> new TransactionNotFoundException(tid)
-        );
+        UserEntity userEntity = userService.getUserEntityByFirebaseUserData(firebaseUserData);
+
+        Optional<TransactionEntity> transactionEntityOptional =
+                transactionRepository.findByUserEntityAndTid(userEntity, tid);
+
+        if (transactionEntityOptional.isEmpty()) {
+            throw new TransactionNotFoundException(tid);
+        }
         return transactionDataMapper.toTransactionResponseData(
-                transactionEntity,
-                transactionProductService.getTransactionProductResposneDataList(
-                        transactionEntity
+                transactionEntityOptional.get(),
+                transactionProductService.getTransactionProductResponseDataList(
+                        transactionEntityOptional.get()
                 )
         );
     }
+
     @Override
     @Transactional
     public void updateTransactionStatusProcessing(FirebaseUserData firebaseUserData, Integer tid){
@@ -102,14 +110,14 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new TransactionNotFoundException(tid);
             }
             //check transaction status
-            if (transactionEntityOptional.get().getStatus().equals("PREPARE")) {
+            if (transactionEntityOptional.get().getStatus().equals(Status.PREPARE)) {
                 //check stock availability and deduct stock
                 productService.paymentProcessingAndDeductStock(
-                        transactionProductService.getTransactionProductResposneDataList(
+                        transactionProductService.getTransactionProductResponseDataList(
                                 transactionEntityOptional.get()
                         )
                 );
-                transactionEntityOptional.get().setStatus("PROCESSING");
+                transactionEntityOptional.get().setStatus(Status.PROCESSING);
             } else{
                 throw new TransactionStatusNotPrepareException(transactionEntityOptional.get().getStatus());
             }
@@ -131,14 +139,14 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new TransactionNotFoundException(tid);
             }
             //check transaction status
-            if (transactionEntityOptional.get().getStatus().equals("PROCESSING")) {
-                transactionEntityOptional.get().setStatus("SUCCESS");
+            if (transactionEntityOptional.get().getStatus().equals(Status.PROCESSING)) {
+                transactionEntityOptional.get().setStatus(Status.SUCCESS);
             } else{
                 throw new TransactionStatusNotProcessingException(transactionEntityOptional.get().getStatus());
             }
             return transactionDataMapper.toTransactionResponseData(
                     transactionEntityOptional.get(),
-                    transactionProductService.getTransactionProductResposneDataList(
+                    transactionProductService.getTransactionProductResponseDataList(
                             transactionEntityOptional.get()
                     )
             );

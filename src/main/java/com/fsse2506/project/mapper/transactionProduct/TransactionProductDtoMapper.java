@@ -6,9 +6,7 @@ import com.fsse2506.project.mapper.product.ProductDtoMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(uses=ProductDtoMapper.class, componentModel="spring")
@@ -28,5 +26,4 @@ public interface TransactionProductDtoMapper {
     List<TransactionProductResponseDto> toTransactionProductResponseDtoList(
             List<TransactionProductResponseData> transactionProductResponseDataList
     );
-
 }

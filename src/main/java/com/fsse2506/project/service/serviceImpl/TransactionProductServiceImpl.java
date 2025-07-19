@@ -31,15 +31,18 @@ public class TransactionProductServiceImpl implements TransactionProductService 
             TransactionEntity transactionEntity
             , List<CartItemResponseData> cartItemResponseDataList
     ){
-        //convert cartItemList to transactionProductEntityList
+        //convert cartItemResponseDataList to ProductEntityList
+        List<ProductEntity> productEntityList=new ArrayList<>();
+        for (CartItemResponseData cartItemResponseData: cartItemResponseDataList){
+            productEntityList.add(
+                    productService.getProductEntityByPid(cartItemResponseData.getPid())
+            );
+        }
+        //convert to transactionProductEntityList
         List<TransactionProductEntity> transactionProductEntityList
                 =transactionProductEntityMapper.toTransactionProductEntityList(
-                cartItemResponseDataList,transactionEntity
+                productEntityList,cartItemResponseDataList,transactionEntity
         );
-        //convert transactionProductEntityList to productEntityList
-        List<ProductEntity> productEntityList=
-                getProductEntityList(transactionProductEntityList);
-
         //update transactionProductionRepository
         transactionProductEntityList=
                 (List<TransactionProductEntity>)transactionProductRepository
@@ -52,7 +55,7 @@ public class TransactionProductServiceImpl implements TransactionProductService 
         );
     }
     @Override
-    public List<TransactionProductResponseData> getTransactionProductResposneDataList(
+    public List<TransactionProductResponseData> getTransactionProductResponseDataList(
             TransactionEntity transactionEntity){
         List<TransactionProductEntity> transactionProductEntityList=
                 transactionProductRepository.findAllByTransactionEntity(transactionEntity);

@@ -1,6 +1,5 @@
 package com.fsse2506.project.data.transaction.domainObject.response;
 
-
 import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 
 import lombok.Data;

@@ -20,4 +20,5 @@ public interface ProductDataMapper {
 
     List<ProductResponseData> toProductResponseDataList(List<ProductEntity> productEntityList);
 
+
 }

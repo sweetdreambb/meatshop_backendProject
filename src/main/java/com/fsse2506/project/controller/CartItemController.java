@@ -5,25 +5,20 @@ import com.fsse2506.project.mapper.cartItem.CartItemDtoMapper;
 import com.fsse2506.project.mapper.user.UserDataMapper;
 import com.fsse2506.project.service.CartItemService;
 import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("cart/items")
 public class CartItemController {
     private final UserDataMapper userDataMapper;
     private final CartItemService cartItemService;
     private final CartItemDtoMapper cartItemDtoMapper;
-
-    public CartItemController(UserDataMapper userDataMapper, CartItemService cartItemService, CartItemDtoMapper cartItemDtoMapper) {
-        this.userDataMapper = userDataMapper;
-        this.cartItemService = cartItemService;
-        this.cartItemDtoMapper = cartItemDtoMapper;
-    }
 
     @PutMapping("/{pid}/{quantity}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

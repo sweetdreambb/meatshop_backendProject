@@ -1,18 +1,20 @@
 package com.fsse2506.project.data.transaction.entity;
 
+import com.fsse2506.project.data.transaction.status.Status;
 import com.fsse2506.project.data.user.entity.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name="transaction")
-@Data
+@Getter
+@Setter
 
 public class TransactionEntity {
     @Id
@@ -24,7 +26,8 @@ public class TransactionEntity {
     @Column(nullable = false)
     private LocalDateTime datetime;
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
     @Column(nullable = false)
     @Min(0)
     private BigDecimal total;

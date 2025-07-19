@@ -4,10 +4,7 @@ import com.fsse2506.project.data.product.entity.ProductEntity;
 import com.fsse2506.project.data.transactionProduct.entity.TransactionProductEntity;
 import org.mapstruct.Mapper;
 
-import java.util.List;
-
 @Mapper(componentModel="spring")
 public interface ProductEntityMapper {
     ProductEntity toProductEntity(TransactionProductEntity transactionProductEntity);
-    List<ProductEntity> toProductEntityList(List<TransactionProductEntity> transactionProductEntityList);
 }

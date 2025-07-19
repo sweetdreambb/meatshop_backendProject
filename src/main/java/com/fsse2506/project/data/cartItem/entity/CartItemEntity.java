@@ -5,15 +5,13 @@ import com.fsse2506.project.data.user.entity.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Entity
 @Table(name="cart_item")
-@Getter @Setter
-@Data  // Add this annotation
+@Getter
+@Setter
 public class CartItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
