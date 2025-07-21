@@ -30,4 +30,11 @@ public class ProductController {
                 productService.getProductByPid(id)
         );
     }
+    @GetMapping("/category/{category}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<GetAllProductResponseDto> getProductListByCategory(@PathVariable (name="category") String cat){
+        return productDtoMapper.toGetAllProductResponseDtoList(
+                productService.getProductListByCategory(cat)
+        );
+    }
 }

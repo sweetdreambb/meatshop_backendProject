@@ -16,6 +16,8 @@ public class ProductEntity {
     private Integer pid;
     @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
+    private String category;
 
     private String description;
 

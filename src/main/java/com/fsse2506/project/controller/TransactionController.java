@@ -39,7 +39,9 @@ public class TransactionController {
     @PatchMapping("/{tid}/payment")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateTransactionStatusProcessing(@AuthenticationPrincipal Jwt jwt, @PathVariable Integer tid){
-        transactionService.updateTransactionStatusProcessing(userDataMapper.toFirebaseUserData(jwt),tid);
+        transactionService.updateTransactionStatusProcessing(
+                userDataMapper.toFirebaseUserData(jwt),tid
+        );
     }
     @PatchMapping("/{tid}/success")
     @ResponseStatus(HttpStatus.OK)

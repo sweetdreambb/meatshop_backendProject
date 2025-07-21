@@ -19,4 +19,5 @@ public interface ProductService {
 
     void paymentProcessingAndDeductStock(List<TransactionProductResponseData> transactionProductResponseDataList);
 
+    List<GetAllProductResponseData> getProductListByCategory(String category);
 }

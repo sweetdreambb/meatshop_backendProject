@@ -5,14 +5,11 @@ import com.fsse2506.project.data.transactionProduct.dto.response.TransactionProd
 import com.fsse2506.project.mapper.product.ProductDtoMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
 @Mapper(uses=ProductDtoMapper.class, componentModel="spring")
 public interface TransactionProductDtoMapper {
-
-    ProductDtoMapper INSTANCE= Mappers.getMapper(ProductDtoMapper.class);
 
     @Mapping(target="productResponseDto", source="productResponseData")
     TransactionProductResponseDto toTransactionProductResponseDto(TransactionProductResponseData transactionProductResponseData);

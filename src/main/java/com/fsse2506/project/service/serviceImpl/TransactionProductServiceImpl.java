@@ -38,7 +38,6 @@ public class TransactionProductServiceImpl implements TransactionProductService 
                     productService.getProductEntityByPid(cartItemResponseData.getPid())
             );
         }
-        //convert to transactionProductEntityList
         List<TransactionProductEntity> transactionProductEntityList
                 =transactionProductEntityMapper.toTransactionProductEntityList(
                 productEntityList,cartItemResponseDataList,transactionEntity

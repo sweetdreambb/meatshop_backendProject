@@ -14,7 +14,6 @@ import java.math.BigDecimal;
         @Index(name="idx_transaction_product_tid_pid", columnList = "tid,pid")
 })
 @Getter @Setter
-
 public class TransactionProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

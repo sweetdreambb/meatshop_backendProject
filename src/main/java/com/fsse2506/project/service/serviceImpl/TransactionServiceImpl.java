@@ -5,10 +5,11 @@ import com.fsse2506.project.data.cartItem.domainObject.response.CartItemResponse
 import com.fsse2506.project.data.transaction.domainObject.response.TransactionResponseData;
 import com.fsse2506.project.data.transaction.entity.TransactionEntity;
 
-import com.fsse2506.project.data.transaction.status.Status;
+import com.fsse2506.project.enumeration.Status;
 import com.fsse2506.project.data.transactionProduct.domainObject.response.TransactionProductResponseData;
 import com.fsse2506.project.data.user.domainObject.request.FirebaseUserData;
 import com.fsse2506.project.data.user.entity.UserEntity;
+import com.fsse2506.project.exception.transaction.TransactionCartEmptyException;
 import com.fsse2506.project.exception.transaction.TransactionNotFoundException;
 import com.fsse2506.project.exception.transaction.TransactionStatusNotPrepareException;
 import com.fsse2506.project.exception.transaction.TransactionStatusNotProcessingException;
@@ -41,85 +42,87 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public TransactionResponseData createTransaction(
             FirebaseUserData firebaseUserData){
+        try {
+            UserEntity userEntity =
+                    userService.getUserEntityByFirebaseUserData(firebaseUserData);
 
-        UserEntity userEntity=
-                userService.getUserEntityByFirebaseUserData(firebaseUserData);
+            List<CartItemResponseData> cartItemResponseDataList =
+                    cartItemService.getUserCart(firebaseUserData);
 
-        List<CartItemResponseData> cartItemResponseDataList=
-                cartItemService.getUserCart(firebaseUserData);
+            BigDecimal total = BigDecimal.ZERO;
+            for (CartItemResponseData cartItemResponseData : cartItemResponseDataList) {
+                BigDecimal quantity = BigDecimal.valueOf(cartItemResponseData.getCartQuantity());
+                BigDecimal price = cartItemResponseData.getPrice();
+                total = total.add(quantity.multiply(price));
+            }
 
-        BigDecimal total=BigDecimal.ZERO;
-        for (CartItemResponseData cartItemResponseData: cartItemResponseDataList){
-            BigDecimal quantity=BigDecimal.valueOf(cartItemResponseData.getCartQuantity());
-            BigDecimal price=cartItemResponseData.getPrice();
-            total=total.add(quantity.multiply(price));
-        }
-        TransactionEntity transactionEntity=new TransactionEntity();
-        transactionEntity.setUserEntity(userEntity);
-        transactionEntity.setDatetime(LocalDateTime.now());
-        transactionEntity.setStatus(Status.PREPARE);
-        transactionEntity.setTotal(total);
-        transactionEntity=transactionRepository.save(transactionEntity);
+            if (total.equals(BigDecimal.ZERO)) {
+                throw new TransactionCartEmptyException(userEntity.getUid());
+            }
+            TransactionEntity transactionEntity = new TransactionEntity();
+            transactionEntity.setUserEntity(userEntity);
+            transactionEntity.setDatetime(LocalDateTime.now());
+            transactionEntity.setStatus(Status.PREPARE);
+            transactionEntity.setTotal(total);
+            transactionEntity = transactionRepository.save(transactionEntity);
 
-        List<TransactionProductResponseData> transactionProductResponseDataList
-                =transactionProductService
-                .createTransactionProductResponseDataList(
-                        transactionEntity,
-                        cartItemResponseDataList
+            List<TransactionProductResponseData> transactionProductResponseDataList
+                    = transactionProductService
+                    .createTransactionProductResponseDataList(
+                            transactionEntity,
+                            cartItemResponseDataList
+                    );
+            for (TransactionProductResponseData transactionProductResponseData :
+                    transactionProductResponseDataList) {
+                cartItemService.removeCartItem(
+                        firebaseUserData
+                        , transactionProductResponseData.getProductResponseData().getPid()
                 );
-        for (TransactionProductResponseData transactionProductResponseData:
-                transactionProductResponseDataList){
-            cartItemService.removeCartItem(
-                    firebaseUserData
-                    ,transactionProductResponseData.getProductResponseData().getPid()
+            }
+            return transactionDataMapper.toTransactionResponseData(
+                    transactionEntity,
+                    transactionProductResponseDataList
             );
+        } catch (Exception ex){
+            logger.warn("Create Transaction Failed: {}",ex.getMessage());
+            throw ex;
         }
-        return transactionDataMapper.toTransactionResponseData(
-                transactionEntity,
-                transactionProductResponseDataList
-        );
     }
     @Override
     public TransactionResponseData getTransactionById(FirebaseUserData firebaseUserData, Integer tid){
-        UserEntity userEntity = userService.getUserEntityByFirebaseUserData(firebaseUserData);
-
-        Optional<TransactionEntity> transactionEntityOptional =
-                transactionRepository.findByUserEntityAndTid(userEntity, tid);
-
-        if (transactionEntityOptional.isEmpty()) {
-            throw new TransactionNotFoundException(tid);
+        try {
+            UserEntity userEntity = userService.getUserEntityByFirebaseUserData(firebaseUserData);
+            TransactionEntity transactionEntity=findTidByUser(userEntity, tid);
+            return transactionDataMapper.toTransactionResponseData(
+                    transactionEntity,
+                    transactionProductService.getTransactionProductResponseDataList(
+                            transactionEntity
+                    )
+            );
+        } catch (Exception ex){
+            logger.warn("Get Transaction Failed: {}",ex.getMessage());
+            throw ex;
         }
-        return transactionDataMapper.toTransactionResponseData(
-                transactionEntityOptional.get(),
-                transactionProductService.getTransactionProductResponseDataList(
-                        transactionEntityOptional.get()
-                )
-        );
     }
 
     @Override
     @Transactional
     public void updateTransactionStatusProcessing(FirebaseUserData firebaseUserData, Integer tid){
         try {
-            Optional<TransactionEntity> transactionEntityOptional =
-                    transactionRepository.findByUserEntityAndTid(
-                            userService.getUserEntityByFirebaseUserData(firebaseUserData)
-                            , tid
-                    );
-            if (transactionEntityOptional.isEmpty()) {
-                throw new TransactionNotFoundException(tid);
-            }
+            TransactionEntity transactionEntity=findTidByUser(
+                    userService.getUserEntityByFirebaseUserData(firebaseUserData), tid
+            );
             //check transaction status
-            if (transactionEntityOptional.get().getStatus().equals(Status.PREPARE)) {
+            if (transactionEntity.getStatus() == Status.PREPARE) {
                 //check stock availability and deduct stock
                 productService.paymentProcessingAndDeductStock(
                         transactionProductService.getTransactionProductResponseDataList(
-                                transactionEntityOptional.get()
+                                transactionEntity
                         )
                 );
-                transactionEntityOptional.get().setStatus(Status.PROCESSING);
+                transactionEntity.setStatus(Status.PROCESSING);
             } else{
-                throw new TransactionStatusNotPrepareException(transactionEntityOptional.get().getStatus());
+                throw new TransactionStatusNotPrepareException(transactionEntity.getStatus());
             }
         } catch (Exception ex) {
             logger.warn("Update Transaction Status to Processing Failed: {}",ex.getMessage());
@@ -130,29 +133,32 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public TransactionResponseData updateTransactionStatusSuccess(FirebaseUserData firebaseUserData, Integer tid) {
         try {
-            Optional<TransactionEntity> transactionEntityOptional =
-                    transactionRepository.findByUserEntityAndTid(
-                            userService.getUserEntityByFirebaseUserData(firebaseUserData)
-                            , tid
-                    );
-            if (transactionEntityOptional.isEmpty()) {
-                throw new TransactionNotFoundException(tid);
-            }
+            TransactionEntity transactionEntity=findTidByUser(
+                    userService.getUserEntityByFirebaseUserData(firebaseUserData), tid
+            );
             //check transaction status
-            if (transactionEntityOptional.get().getStatus().equals(Status.PROCESSING)) {
-                transactionEntityOptional.get().setStatus(Status.SUCCESS);
+            if (transactionEntity.getStatus()==Status.PROCESSING) {
+                transactionEntity.setStatus(Status.SUCCESS);
             } else{
-                throw new TransactionStatusNotProcessingException(transactionEntityOptional.get().getStatus());
+                throw new TransactionStatusNotProcessingException(transactionEntity.getStatus());
             }
             return transactionDataMapper.toTransactionResponseData(
-                    transactionEntityOptional.get(),
+                    transactionEntity,
                     transactionProductService.getTransactionProductResponseDataList(
-                            transactionEntityOptional.get()
+                            transactionEntity
                     )
             );
         } catch (Exception ex) {
             logger.warn("Update Transaction Status to Success Failed: {}",ex.getMessage());
             throw ex;
         }
+    }
+    public TransactionEntity findTidByUser(UserEntity userEntity, Integer tid){
+        Optional<TransactionEntity> transactionEntityOptional =
+                transactionRepository.findByUserEntityAndTid(userEntity, tid);
+        if (transactionEntityOptional.isEmpty()) {
+            throw new TransactionNotFoundException(tid);
+        }
+        return transactionEntityOptional.get();
     }
 }

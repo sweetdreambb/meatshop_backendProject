@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 @Getter @Setter
 public class TransactionResponseData {
@@ -15,5 +16,5 @@ public class TransactionResponseData {
     private LocalDateTime datetime;
     private String status;
     private BigDecimal total;
-    private List<TransactionProductResponseData> transactionProductResponseDataList;
+    private List<TransactionProductResponseData> transactionProductResponseDataList=new ArrayList<>();
 }

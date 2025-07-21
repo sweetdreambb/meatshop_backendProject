@@ -17,4 +17,6 @@ public interface ProductDtoMapper {
 
     ProductResponseDto toProductResponseDto(ProductResponseData productResponseData);
 
+    List<ProductResponseDto> toProductResponseDtoList(List<ProductResponseData> productResponseDataList);
+
 }

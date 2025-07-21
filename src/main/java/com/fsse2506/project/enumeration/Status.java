@@ -1,4 +1,4 @@
-package com.fsse2506.project.data.transaction.status;
+package com.fsse2506.project.enumeration;
 
 public enum Status {
     PREPARE,

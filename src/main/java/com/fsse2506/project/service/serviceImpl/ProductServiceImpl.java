@@ -74,4 +74,10 @@ public class ProductServiceImpl implements ProductService {
             throw ex;
         }
     }
+    @Override
+    public List<GetAllProductResponseData> getProductListByCategory(String category) {
+            return productDataMapper.toGetAllProductResponseDataList(
+                    productRepository.findByCategory(category)
+            );
+    }
 }

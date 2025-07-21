@@ -12,7 +12,6 @@ public interface TransactionProductService {
 
     List<TransactionProductResponseData> createTransactionProductResponseDataList(TransactionEntity transactionEntity, List<CartItemResponseData> cartItemResponseDataList);
 
-
     List<TransactionProductResponseData> getTransactionProductResponseDataList(
             TransactionEntity transactionEntity);
 
