@@ -14,7 +14,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -32,12 +31,19 @@ public class TransactionProductServiceImpl implements TransactionProductService 
             , List<CartItemResponseData> cartItemResponseDataList
     ){
         //convert cartItemResponseDataList to ProductEntityList
-        List<ProductEntity> productEntityList=new ArrayList<>();
-        for (CartItemResponseData cartItemResponseData: cartItemResponseDataList){
-            productEntityList.add(
-                    productService.getProductEntityByPid(cartItemResponseData.getPid())
-            );
-        }
+//        List<ProductEntity> productEntityList=new ArrayList<>();
+//        for (CartItemResponseData cartItemResponseData: cartItemResponseDataList){
+//            productEntityList.add(
+//                    productService.getProductEntityByPid(cartItemResponseData.getPid())
+//            );
+//        }
+        // Convert cartItemResponseDataList to ProductEntityList using streams
+        List<ProductEntity> productEntityList = cartItemResponseDataList.stream()
+                .map(cartItemResponseData
+                        -> productService.getProductEntityByPid(
+                                cartItemResponseData.getPid())
+                )
+                .toList();
         List<TransactionProductEntity> transactionProductEntityList
                 =transactionProductEntityMapper.toTransactionProductEntityList(
                 productEntityList,cartItemResponseDataList,transactionEntity
@@ -69,14 +75,22 @@ public class TransactionProductServiceImpl implements TransactionProductService 
     @Override
     public List<ProductEntity> getProductEntityList(List<TransactionProductEntity> transactionProductEntityList){
         //convert transactionProductEntityList to productEntityList
-        List<ProductEntity> productEntityList=new ArrayList<>();
-        for (TransactionProductEntity transactionProductEntity: transactionProductEntityList){
-            productEntityList.add(
-                    productService.getProductEntityByPid(
-                            transactionProductEntity.getPid()
-                    )
-            );
-        }
-        return productEntityList;
+//        List<ProductEntity> productEntityList=new ArrayList<>();
+//        for (TransactionProductEntity transactionProductEntity: transactionProductEntityList){
+//            productEntityList.add(
+//                    productService.getProductEntityByPid(
+//                            transactionProductEntity.getPid()
+//                    )
+//            );
+//        }
+//        return productEntityList;
+
+        // Convert transactionProductEntityList to productEntityList using streams
+        return transactionProductEntityList.stream()
+                .map(transactionProductEntity
+                        -> productService.getProductEntityByPid(
+                        transactionProductEntity.getPid()
+                ))
+                .toList();
     }
 }

@@ -57,10 +57,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void paymentProcessingAndDeductStock(List<TransactionProductResponseData> transactionProductResponseDataList){
         try {
-            for (TransactionProductResponseData transactionProductResponseData : transactionProductResponseDataList) {
-                ProductEntity productEntity = getProductEntityByPid(
-                        transactionProductResponseData.getProductResponseData().getPid()
-                );
+//            for (TransactionProductResponseData transactionProductResponseData : transactionProductResponseDataList) {
+//
+                // Using streams with forEach for side effects (database operations)
+                transactionProductResponseDataList.stream()
+                        .forEach(transactionProductResponseData -> {
+                            ProductEntity productEntity = getProductEntityByPid(
+                                    transactionProductResponseData.getProductResponseData().getPid()
+                            );
                 Integer stock = productEntity.getStock();
                 Integer quantity = transactionProductResponseData.getQuantity();
                 if (stock < quantity) {
@@ -68,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
                 }
                 productEntity.setStock(stock - quantity);
                 productRepository.save(productEntity);
-            }
+                        });
         } catch(Exception ex){
             logger.warn("Payment Processing and deduct stock failed: {}",ex.getMessage());
             throw ex;

@@ -49,13 +49,24 @@ public class TransactionServiceImpl implements TransactionService {
             List<CartItemResponseData> cartItemResponseDataList =
                     cartItemService.getUserCart(firebaseUserData);
 
-            BigDecimal total = BigDecimal.ZERO;
-            for (CartItemResponseData cartItemResponseData : cartItemResponseDataList) {
-                BigDecimal quantity = BigDecimal.valueOf(cartItemResponseData.getCartQuantity());
-                BigDecimal price = cartItemResponseData.getPrice();
-                total = total.add(quantity.multiply(price));
-            }
+//            BigDecimal total = BigDecimal.ZERO;
+//            for (CartItemResponseData cartItemResponseData : cartItemResponseDataList) {
+//                BigDecimal quantity = BigDecimal.valueOf(cartItemResponseData.getCartQuantity());
+//                BigDecimal price = cartItemResponseData.getPrice();
+//                total = total.add(quantity.multiply(price));
+//            }
 
+            // Calculate total using streams instead of manual loop
+            BigDecimal total = cartItemResponseDataList.stream()
+                    .map(cartItem
+                            -> BigDecimal.valueOf(cartItem.getCartQuantity())
+                            .multiply(cartItem.getPrice()))  // Creates stream of subtotals
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);  // Sums all subtotals
+//            Starts with BigDecimal.ZERO as the initial value
+//
+//            Uses BigDecimal::add to sum all the subtotals
+//
+//            Returns the final total as a BigDecimal
             if (total.equals(BigDecimal.ZERO)) {
                 throw new TransactionCartEmptyException(userEntity.getUid());
             }
@@ -72,13 +83,22 @@ public class TransactionServiceImpl implements TransactionService {
                             transactionEntity,
                             cartItemResponseDataList
                     );
-            for (TransactionProductResponseData transactionProductResponseData :
-                    transactionProductResponseDataList) {
-                cartItemService.removeCartItem(
-                        firebaseUserData
-                        , transactionProductResponseData.getProductResponseData().getPid()
-                );
-            }
+//            for (TransactionProductResponseData transactionProductResponseData :
+//                    transactionProductResponseDataList) {
+//                cartItemService.removeCartItem(
+//                        firebaseUserData
+//                        , transactionProductResponseData.getProductResponseData().getPid()
+//                );
+//            }
+
+            // Remove cart items using streams
+            transactionProductResponseDataList.stream()
+                    .forEach(transactionProductResponseData ->
+                            cartItemService.removeCartItem(
+                                    firebaseUserData,
+                                    transactionProductResponseData.getProductResponseData().getPid()
+                            ));
+
             return transactionDataMapper.toTransactionResponseData(
                     transactionEntity,
                     transactionProductResponseDataList
