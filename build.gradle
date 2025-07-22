@@ -41,6 +41,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
+//// AWS SDK v2 (modern version)
+//    implementation platform('software.amazon.awssdk:bom:2.25.24')
+//    implementation 'software.amazon.awssdk:s3'
+//    implementation 'software.amazon.awssdk:sts' // For credential resolution
+//    // NEW: Redis Cache Dependencies
+//    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//    implementation 'org.springframework.boot:spring-boot-starter-cache'
+//    implementation 'org.springframework.data:spring-data-redis'
+
+    // Runtime and test dependencies
     testImplementation 'org.springframework.security:spring-security-test'
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

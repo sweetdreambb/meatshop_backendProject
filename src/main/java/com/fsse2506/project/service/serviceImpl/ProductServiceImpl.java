@@ -62,17 +62,23 @@ public class ProductServiceImpl implements ProductService {
                 // Using streams with forEach for side effects (database operations)
                 transactionProductResponseDataList.stream()
                         .forEach(transactionProductResponseData -> {
-                            ProductEntity productEntity = getProductEntityByPid(
-                                    transactionProductResponseData.getProductResponseData().getPid()
-                            );
-                Integer stock = productEntity.getStock();
-                Integer quantity = transactionProductResponseData.getQuantity();
-                if (stock < quantity) {
-                    throw new TransactionProductExceedStockException(transactionProductResponseData.getTpid());
-                }
-                productEntity.setStock(stock - quantity);
-                productRepository.save(productEntity);
-                        });
+                            try{
+                                ProductEntity productEntity = getProductEntityByPid(
+                                        transactionProductResponseData.getProductResponseData().getPid()
+                                );
+                                Integer stock = productEntity.getStock();
+                                Integer quantity = transactionProductResponseData.getQuantity();
+                                if (stock < quantity) {
+                                    throw new TransactionProductExceedStockException(transactionProductResponseData.getTpid());
+                                }
+                                productEntity.setStock(stock - quantity);
+                                productRepository.save(productEntity);
+                            } catch(Exception ex){
+                                logger.error("Failed to process product {}: {}",transactionProductResponseData.getProductResponseData().getPid(),ex.getMessage());
+                                throw ex;// Re-throw to ensure transaction rollback
+                            }
+
+            });
         } catch(Exception ex){
             logger.warn("Payment Processing and deduct stock failed: {}",ex.getMessage());
             throw ex;
