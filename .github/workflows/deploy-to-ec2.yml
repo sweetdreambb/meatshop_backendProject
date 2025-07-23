@@ -50,3 +50,8 @@ jobs:
           docker rm myapp || true
           docker run -d --name myapp -p 80:8080 ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
         EOF
+    - name: Verify secrets
+      run: |
+        echo "DockerHub username: ${{ secrets.DOCKERHUB_USERNAME }}"
+        echo "EC2 host: ${{ secrets.EC2_HOST }}"
+        echo "SSH port: ${{ secrets.EC2_SSH_PORT }}"
